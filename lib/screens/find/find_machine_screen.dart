@@ -158,9 +158,9 @@ class _FindToggle extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight,
+        color: const Color(0xFFF7F3DE),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.accentBorder),
       ),
       child: Row(
         children: [
@@ -188,7 +188,7 @@ class _FindToggle extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 9),
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primaryDark : Colors.transparent,
+            color: isActive ? AppColors.accentGold : Colors.transparent,
             borderRadius: BorderRadius.circular(7),
           ),
           child: Text(
@@ -197,7 +197,7 @@ class _FindToggle extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: isActive ? Colors.white : AppColors.textSecondary,
+              color: isActive ? AppColors.accentText : AppColors.textSecondary,
             ),
           ),
         ),

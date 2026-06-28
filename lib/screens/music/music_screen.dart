@@ -79,7 +79,7 @@ class MusicScreen extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               SizedBox(
-                height: 126,
+                height: 136,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -220,7 +220,7 @@ class _QuickTrackCard extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.92),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.play_arrow_rounded, size: 17, color: AppColors.primaryDark),
+                    child: const Icon(Icons.play_arrow_rounded, size: 17, color: AppColors.amber),
                   ),
                 ),
               ],
@@ -257,8 +257,8 @@ class _ModeCard extends StatelessWidget {
           children: [
             Container(
               width: 40, height: 40,
-              decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),
-              child: Icon(item.icon, size: 21, color: AppColors.primaryDark),
+              decoration: BoxDecoration(color: AppColors.accentGold, borderRadius: BorderRadius.circular(12)),
+              child: Icon(item.icon, size: 21, color: AppColors.amber),
             ),
             const SizedBox(height: 8),
             Text(item.label, style: GoogleFonts.ibmPlexSansThai(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
@@ -357,7 +357,7 @@ class _PlaylistRow extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.more_vert_rounded, size: 18, color: AppColors.textMuted),
+            const Icon(Icons.more_vert_rounded, size: 18, color: AppColors.amber),
           ],
         ),
       ),

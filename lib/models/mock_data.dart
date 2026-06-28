@@ -12,6 +12,7 @@ import 'order_item_model.dart';
 import 'order_model.dart';
 import 'cart_item_model.dart';
 import 'biometric_session_model.dart';
+import 'machine_model.dart';
 
 /// ข้อมูลจำลองสำหรับ Development — แทนที่ด้วย api_service.dart เมื่อ Back-end พร้อม
 abstract class MockData {
@@ -155,6 +156,33 @@ abstract class MockData {
   ];
 
   // ─────────────────────────────────────────
+  // MACHINES (WeLLzen ที่ค้นหาได้ในหน้า Find)
+  // ─────────────────────────────────────────
+  static const List<MachineModel> machines = [
+    // ve1 — WeLLtion Studio สีลม (3 ตัว)
+    MachineModel(id: 'mc1', name: 'WeLLzen #A01', venueName: 'WeLLtion Studio สีลม',
+      address: '123 ถ.สีลม แขวงสีลม เขตบางรัก กรุงเทพ', status: MachineStatus.available, distanceKm: 2.5, priceInfo: '฿70 / 30 นาที'),
+    MachineModel(id: 'mc2', name: 'WeLLzen #A02', venueName: 'WeLLtion Studio สีลม',
+      address: '123 ถ.สีลม แขวงสีลม เขตบางรัก กรุงเทพ', status: MachineStatus.available, distanceKm: 2.5, priceInfo: '฿70 / 30 นาที'),
+    MachineModel(id: 'mc3', name: 'WeLLzen #A03', venueName: 'WeLLtion Studio สีลม',
+      address: '123 ถ.สีลม แขวงสีลม เขตบางรัก กรุงเทพ', status: MachineStatus.inUse, distanceKm: 2.5, priceInfo: '฿70 / 30 นาที'),
+    // ve2 — Serenity Space ทองหล่อ (2 ตัว)
+    MachineModel(id: 'mc4', name: 'WeLLzen #B01', venueName: 'Serenity Space ทองหล่อ',
+      address: '55/12 ซ.ทองหล่อ 13 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพ', status: MachineStatus.available, distanceKm: 4.1, priceInfo: '฿90 / 30 นาที'),
+    MachineModel(id: 'mc5', name: 'WeLLzen #B02', venueName: 'Serenity Space ทองหล่อ',
+      address: '55/12 ซ.ทองหล่อ 13 แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพ', status: MachineStatus.inUse, distanceKm: 4.1, priceInfo: '฿90 / 30 นาที'),
+    // ve3 — Zen Garden อโศก (4 ตัว)
+    MachineModel(id: 'mc6', name: 'WeLLzen #C01', venueName: 'Zen Garden อโศก',
+      address: '8 ถ.อโศกมนตรี แขวงคลองเตยเหนือ เขตวัฒนา กรุงเทพ', status: MachineStatus.available, distanceKm: 3.3, priceInfo: '฿75 / 30 นาที'),
+    MachineModel(id: 'mc7', name: 'WeLLzen #C02', venueName: 'Zen Garden อโศก',
+      address: '8 ถ.อโศกมนตรี แขวงคลองเตยเหนือ เขตวัฒนา กรุงเทพ', status: MachineStatus.available, distanceKm: 3.3, priceInfo: '฿75 / 30 นาที'),
+    MachineModel(id: 'mc8', name: 'WeLLzen #C03', venueName: 'Zen Garden อโศก',
+      address: '8 ถ.อโศกมนตรี แขวงคลองเตยเหนือ เขตวัฒนา กรุงเทพ', status: MachineStatus.available, distanceKm: 3.3, priceInfo: '฿75 / 30 นาที'),
+    MachineModel(id: 'mc9', name: 'WeLLzen #C04', venueName: 'Zen Garden อโศก',
+      address: '8 ถ.อโศกมนตรี แขวงคลองเตยเหนือ เขตวัฒนา กรุงเทพ', status: MachineStatus.available, distanceKm: 3.3, priceInfo: '฿75 / 30 นาที'),
+  ];
+
+  // ─────────────────────────────────────────
   // DEVICES
   // ─────────────────────────────────────────
   static final List<DeviceModel> devices = [
@@ -229,10 +257,16 @@ abstract class MockData {
         'https://picsum.photos/seed/venue-silom-2/800/500',
         'https://picsum.photos/seed/venue-silom-3/800/500',
       ],
-      amenities: ['ที่จอดรถ', 'WiFi', 'ห้องน้ำ', 'ล็อกเกอร์', 'เครื่องดื่มสมุนไพร'],
-      priceInfo: '฿890 / session · ฿4,500 / วัน',
+      amenities: ['WeLLzen 3 ตัว', 'ที่จอดรถ', 'WiFi', 'ห้องน้ำ', 'เครื่องดื่มสมุนไพร'],
+      priceInfo: '฿70 / 30 นาที',
       rentalOptions: [RentalOption.session, RentalOption.daily],
       openingHours: 'จ–ศ 09:00–21:00 · ส–อ 10:00–20:00',
+      rating: 4.9,
+      reviewCount: 128,
+      distanceKm: 2.5,
+      description:
+          'WeLLtion Studio คือพื้นที่บำบัดใจกลางย่านสีลม ออกแบบห้องเก็บเสียงให้เงียบสงบ พร้อม WeLLzen 3 ตัว เหมาะกับการนั่งหรือนอนฟังเสียงบำบัด มีเจ้าหน้าที่ดูแลและเสิร์ฟชาสมุนไพรตลอดเซสชัน',
+      sessionPricing: {30: 70, 45: 100, 60: 130},
     ),
     VenueModel(
       id: 've2',
@@ -244,10 +278,16 @@ abstract class MockData {
         'https://picsum.photos/seed/venue-thong-1/800/500',
         'https://picsum.photos/seed/venue-thong-2/800/500',
       ],
-      amenities: ['WiFi', 'ที่จอดรถ', 'ร้านชาสมุนไพร', 'ห้องอาบน้ำ'],
-      priceInfo: '฿1,200 / session',
+      amenities: ['WeLLzen 2 ตัว', 'WiFi', 'ที่จอดรถ', 'ร้านชาสมุนไพร', 'ห้องอาบน้ำ'],
+      priceInfo: '฿90 / 30 นาที',
       rentalOptions: [RentalOption.session],
       openingHours: 'ทุกวัน 08:00–22:00',
+      rating: 4.7,
+      reviewCount: 84,
+      distanceKm: 4.1,
+      description:
+          'Serenity Space คือสตูดิโอบำบัดเสียงย่านทองหล่อ บรรยากาศอบอุ่นสไตล์มินิมอล เปิดทุกวันตลอดสัปดาห์ เหมาะสำหรับผู้ต้องการพักผ่อนจิตใจหลังเลิกงาน',
+      sessionPricing: {30: 90, 45: 130, 60: 160},
     ),
     VenueModel(
       id: 've3',
@@ -260,10 +300,16 @@ abstract class MockData {
         'https://picsum.photos/seed/venue-asok-2/800/500',
         'https://picsum.photos/seed/venue-asok-3/800/500',
       ],
-      amenities: ['สวนญี่ปุ่น', 'WiFi', 'ที่จอดรถ', 'ล็อกเกอร์', 'เสื้อผ้า Zen'],
-      priceInfo: '฿750 / session · ฿3,200 / วัน',
+      amenities: ['WeLLzen 4 ตัว', 'สวนญี่ปุ่น', 'WiFi', 'ที่จอดรถ', 'ล็อกเกอร์'],
+      priceInfo: '฿75 / 30 นาที',
       rentalOptions: [RentalOption.session, RentalOption.daily],
       openingHours: 'จ–ศ 07:00–20:00 · ส–อ 08:00–20:00',
+      rating: 4.8,
+      reviewCount: 210,
+      distanceKm: 3.3,
+      description:
+          'Zen Garden คือสวนบำบัดสไตล์ญี่ปุ่นใจกลางอโศก เงียบสงบ ร่มรื่น พร้อม WeLLzen 4 ตัว ให้บริการแบบ session หรือเช่าทั้งวัน เหมาะสำหรับกลุ่มและคอร์สฝึกสมาธิ',
+      sessionPricing: {30: 75, 45: 110, 60: 140},
     ),
   ];
 
@@ -391,6 +437,22 @@ abstract class MockData {
       type: PlaylistType.healer,
       healerId: 'h3',
       trackIds: ['t2', 't4', 't3'],
+    ),
+    PlaylistModel(
+      id: 'pl10',
+      title: 'อ.มณีรัตน์ · Sound Bath Deluxe',
+      coverImage: 'https://picsum.photos/seed/playlist-mani2/400/400',
+      type: PlaylistType.healer,
+      healerId: 'h1',
+      trackIds: ['t5', 't3', 't1'],
+    ),
+    PlaylistModel(
+      id: 'pl11',
+      title: 'Dr.Kannika · HRV Boost',
+      coverImage: 'https://picsum.photos/seed/playlist-kannika2/400/400',
+      type: PlaylistType.healer,
+      healerId: 'h2',
+      trackIds: ['t2', 't4', 't1', 't3'],
     ),
   ];
 

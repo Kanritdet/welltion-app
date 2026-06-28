@@ -3,10 +3,18 @@ import 'package:go_router/go_router.dart';
 import '../screens/shell/main_shell.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/find/find_screen.dart';
-import '../screens/find/find_machine_screen.dart';
+import '../screens/find/place_detail_screen.dart';
+import '../screens/find/booking_screen.dart';
+import '../screens/find/booking_status_screen.dart';
+import '../models/booking_model.dart';
 import '../screens/mind/mind_screen.dart';
 import '../screens/player/player_screen.dart';
 import '../screens/music/music_screen.dart';
+import '../screens/connect/connect_device_screen.dart';
+import '../screens/profile/my_orders_screen.dart';
+import '../screens/partner/partner_dashboard_screen.dart';
+import '../screens/partner/partner_bookings_screen.dart';
+import '../screens/profile/profile_screen.dart';
 
 class _PlaceholderScreen extends StatelessWidget {
   const _PlaceholderScreen(this.name);
@@ -37,7 +45,6 @@ final GoRouter appRouter = GoRouter(
         // Tab 1 — Find (Place + Machine อยู่ใน branch เดียวกัน)
         StatefulShellBranch(routes: [
           GoRoute(path: '/find', builder: (_, _) => const FindScreen()),
-          GoRoute(path: '/machine', builder: (_, _) => const FindMachineScreen()),
         ]),
         // Tab 2 — Mind
         StatefulShellBranch(routes: [
@@ -47,22 +54,37 @@ final GoRouter appRouter = GoRouter(
     ),
 
     // ── Profile (full-page, ไม่อยู่ใน shell) ──
-    GoRoute(path: '/profile', builder: (_, _) => const _PlaceholderScreen('14 Profile')),
+    GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
 
     // ── E-Commerce Flow ──
     GoRoute(path: '/product/:id',       builder: (_, _) => const _PlaceholderScreen('05 Product Detail')),
-    GoRoute(path: '/connect',           builder: (_, _) => const _PlaceholderScreen('06 Connect Device')),
+    GoRoute(
+      path: '/connect',
+      builder: (_, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        final modeStr = extra['mode'] as String? ?? 'ownDevice';
+        final mode = ConnectMode.values.firstWhere((m) => m.name == modeStr, orElse: () => ConnectMode.ownDevice);
+        return ConnectDeviceScreen(mode: mode, bookingId: extra['bookingId'] as String?, venueId: extra['venueId'] as String?);
+      },
+    ),
     GoRoute(path: '/cart',              builder: (_, _) => const _PlaceholderScreen('07 Cart')),
     GoRoute(path: '/checkout',          builder: (_, _) => const _PlaceholderScreen('08 Checkout')),
     GoRoute(path: '/order-confirmed',   builder: (_, _) => const _PlaceholderScreen('09 Order Confirmed')),
     GoRoute(path: '/order-error',       builder: (_, _) => const _PlaceholderScreen('09b Order Error')),
 
     // ── Find & Booking Flow ──
-    GoRoute(path: '/place/:id',         builder: (_, _) => const _PlaceholderScreen('10 Place Detail')),
-    GoRoute(path: '/booking',           builder: (_, _) => const _PlaceholderScreen('11a Booking')),
-    GoRoute(path: '/booking/pending',   builder: (_, _) => const _PlaceholderScreen('11d Booking Pending')),
-    GoRoute(path: '/booking/confirmed', builder: (_, _) => const _PlaceholderScreen('11e Booking Confirmed')),
-    GoRoute(path: '/booking/rejected',  builder: (_, _) => const _PlaceholderScreen('11f Booking Rejected')),
+    GoRoute(path: '/place/:id',    builder: (_, state) => PlaceDetailScreen(venueId: state.pathParameters['id']!)),
+    GoRoute(path: '/booking/:id',  builder: (_, state) => BookingScreen(venueId: state.pathParameters['id']!)),
+    GoRoute(
+      path: '/booking-status',
+      builder: (_, state) {
+        final extra = state.extra as Map<String, dynamic>;
+        return BookingStatusScreen(
+          booking: extra['booking'] as BookingModel,
+          venueName: extra['venueName'] as String,
+        );
+      },
+    ),
 
     // ── Music & Mind Flow ──
     GoRoute(path: '/music',        builder: (_, state) => MusicScreen(deviceName: state.extra as String? ?? 'WeLLzen')),
@@ -72,11 +94,11 @@ final GoRouter appRouter = GoRouter(
 
     // ── Profile & Partner Flow ──
     GoRoute(path: '/device-settings',    builder: (_, _) => const _PlaceholderScreen('15 Device Settings')),
-    GoRoute(path: '/partner',            builder: (_, _) => const _PlaceholderScreen('16 Partner Dashboard')),
-    GoRoute(path: '/partner/bookings',   builder: (_, _) => const _PlaceholderScreen('16b Booking Management')),
+    GoRoute(path: '/partner',            builder: (_, _) => const PartnerDashboardScreen()),
+    GoRoute(path: '/partner/bookings',   builder: (_, _) => const PartnerBookingsScreen()),
     GoRoute(path: '/partner/machines',   builder: (_, _) => const _PlaceholderScreen('17g Machine Management')),
 
     // ── My Orders ──
-    GoRoute(path: '/orders', builder: (_, _) => const _PlaceholderScreen('18 My Orders')),
+    GoRoute(path: '/orders', builder: (_, _) => const MyOrdersScreen()),
   ],
 );

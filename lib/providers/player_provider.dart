@@ -3,6 +3,8 @@ import '../models/track_model.dart';
 import '../models/playlist_model.dart';
 import '../models/mock_data.dart';
 
+enum TrackRepeatMode { none, all, one }
+
 class PlayerProvider extends ChangeNotifier {
   TrackModel? _currentTrack;
   PlaylistModel? _currentPlaylist;
@@ -10,7 +12,7 @@ class PlayerProvider extends ChangeNotifier {
   int _currentIndex = 0;
   bool _isPlaying = false;
   bool _isShuffle = false;
-  bool _isRepeat = false;
+  TrackRepeatMode _repeatMode = TrackRepeatMode.none;
 
   TrackModel? get currentTrack => _currentTrack;
   PlaylistModel? get currentPlaylist => _currentPlaylist;
@@ -18,7 +20,7 @@ class PlayerProvider extends ChangeNotifier {
   int get currentIndex => _currentIndex;
   bool get isPlaying => _isPlaying;
   bool get isShuffle => _isShuffle;
-  bool get isRepeat => _isRepeat;
+  TrackRepeatMode get repeatMode => _repeatMode;
   bool get hasNext => _queue.isNotEmpty && _currentIndex < _queue.length - 1;
   bool get hasPrevious => _currentIndex > 0;
 
@@ -76,7 +78,7 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   void toggleRepeat() {
-    _isRepeat = !_isRepeat;
+    _repeatMode = TrackRepeatMode.values[(_repeatMode.index + 1) % TrackRepeatMode.values.length];
     notifyListeners();
   }
 
