@@ -9,6 +9,12 @@ class DeviceModel {
   final String? venueId;
   final DateTime? rentalExpiresAt;
   final DateTime connectedAt;
+  final String customName;
+  final String modelName;
+  final String firmwareVersion;
+  final bool isOnline;
+  final int batteryPercent;
+  final DateTime? lastUsedAt;
 
   const DeviceModel({
     required this.id,
@@ -19,5 +25,11 @@ class DeviceModel {
     this.venueId,
     this.rentalExpiresAt,
     required this.connectedAt,
+    this.customName = '',
+    this.modelName = 'WeLLzen Classic',
+    this.firmwareVersion = 'v2.4.1',
+    this.isOnline = false,
+    this.batteryPercent = 50,
+    this.lastUsedAt,
   });
 }

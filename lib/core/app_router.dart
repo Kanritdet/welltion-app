@@ -12,9 +12,15 @@ import '../screens/player/player_screen.dart';
 import '../screens/music/music_screen.dart';
 import '../screens/connect/connect_device_screen.dart';
 import '../screens/profile/my_orders_screen.dart';
+import '../screens/profile/device_settings_screen.dart';
+import '../screens/profile/device_detail_screen.dart';
 import '../screens/partner/partner_dashboard_screen.dart';
 import '../screens/partner/partner_bookings_screen.dart';
 import '../screens/profile/profile_screen.dart';
+import '../screens/shop/product_detail_screen.dart';
+import '../screens/shop/cart_screen.dart';
+import '../screens/shop/checkout_screen.dart';
+import '../screens/shop/order_confirmed_screen.dart';
 
 class _PlaceholderScreen extends StatelessWidget {
   const _PlaceholderScreen(this.name);
@@ -57,7 +63,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
 
     // ── E-Commerce Flow ──
-    GoRoute(path: '/product/:id',       builder: (_, _) => const _PlaceholderScreen('05 Product Detail')),
+    GoRoute(path: '/product/:id', builder: (_, state) => ProductDetailScreen(productId: state.pathParameters['id']!)),
     GoRoute(
       path: '/connect',
       builder: (_, state) {
@@ -67,10 +73,19 @@ final GoRouter appRouter = GoRouter(
         return ConnectDeviceScreen(mode: mode, bookingId: extra['bookingId'] as String?, venueId: extra['venueId'] as String?);
       },
     ),
-    GoRoute(path: '/cart',              builder: (_, _) => const _PlaceholderScreen('07 Cart')),
-    GoRoute(path: '/checkout',          builder: (_, _) => const _PlaceholderScreen('08 Checkout')),
-    GoRoute(path: '/order-confirmed',   builder: (_, _) => const _PlaceholderScreen('09 Order Confirmed')),
-    GoRoute(path: '/order-error',       builder: (_, _) => const _PlaceholderScreen('09b Order Error')),
+    GoRoute(path: '/cart',            builder: (_, _) => const CartScreen()),
+    GoRoute(path: '/checkout',        builder: (_, _) => const CheckoutScreen()),
+    GoRoute(
+      path: '/order-confirmed',
+      builder: (_, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        return OrderConfirmedScreen(
+          orderId: extra['orderId'] as String? ?? 'ord1',
+          total: (extra['total'] as num?)?.toDouble() ?? 0,
+        );
+      },
+    ),
+    GoRoute(path: '/order-error', builder: (_, _) => const _PlaceholderScreen('09b Order Error')),
 
     // ── Find & Booking Flow ──
     GoRoute(path: '/place/:id',    builder: (_, state) => PlaceDetailScreen(venueId: state.pathParameters['id']!)),
@@ -93,12 +108,28 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: '/healer/:id',   builder: (_, _) => const _PlaceholderScreen('13c Healer Profile')),
 
     // ── Profile & Partner Flow ──
-    GoRoute(path: '/device-settings',    builder: (_, _) => const _PlaceholderScreen('15 Device Settings')),
+    GoRoute(
+      path: '/device-settings',
+      builder: (_, _) => const DeviceSettingsScreen(),
+      routes: [
+        GoRoute(
+          path: ':id',
+          builder: (_, state) => DeviceDetailScreen(deviceId: state.pathParameters['id']!),
+        ),
+      ],
+    ),
     GoRoute(path: '/partner',            builder: (_, _) => const PartnerDashboardScreen()),
     GoRoute(path: '/partner/bookings',   builder: (_, _) => const PartnerBookingsScreen()),
     GoRoute(path: '/partner/machines',   builder: (_, _) => const _PlaceholderScreen('17g Machine Management')),
 
     // ── My Orders ──
-    GoRoute(path: '/orders', builder: (_, _) => const MyOrdersScreen()),
+    GoRoute(
+      path: '/orders',
+      builder: (_, state) {
+        final raw = state.extra;
+        final tab = raw is Map ? raw['tab'] as String? : null;
+        return MyOrdersScreen(initialTab: tab == 'orders' ? 1 : 0);
+      },
+    ),
   ],
 );

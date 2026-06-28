@@ -6,17 +6,24 @@ import '../../models/booking_model.dart';
 import '../../models/order_model.dart';
 
 class MyOrdersScreen extends StatefulWidget {
-  const MyOrdersScreen({super.key});
+  const MyOrdersScreen({super.key, this.initialTab = 0});
+  final int initialTab;
 
   @override
   State<MyOrdersScreen> createState() => _MyOrdersScreenState();
 }
 
 class _MyOrdersScreenState extends State<MyOrdersScreen> {
-  bool _isBookingTab = true;
+  late bool _isBookingTab;
 
   final _bookings = MockData.bookingsByUser('u1');
   final _orders = MockData.orders.where((o) => o.userId == 'u1').toList();
+
+  @override
+  void initState() {
+    super.initState();
+    _isBookingTab = widget.initialTab == 0;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +54,7 @@ class _MyOrdersScreenState extends State<MyOrdersScreen> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.pop(),
+            onTap: () => context.canPop() ? context.pop() : context.go('/home'),
             child: Container(
               width: 40, height: 40,
               decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),

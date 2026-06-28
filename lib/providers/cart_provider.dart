@@ -43,8 +43,18 @@ class CartProvider extends ChangeNotifier {
     required String cartItemId,
     required String userId,
   }) async {
+    _items = _items.where((i) => i.id != cartItemId).toList();
+    notifyListeners();
     await ApiService().removeFromCart(cartItemId);
-    await loadCart(userId);
+  }
+
+  void updateQuantity({required String cartItemId, required int quantity}) {
+    _items = _items.map((i) {
+      if (i.id != cartItemId) return i;
+      return CartItemModel(id: i.id, userId: i.userId, variantId: i.variantId, quantity: quantity);
+    }).toList();
+    notifyListeners();
+    ApiService().updateCartQuantity(cartItemId: cartItemId, quantity: quantity);
   }
 
   void clear() {
