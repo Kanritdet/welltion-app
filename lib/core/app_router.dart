@@ -16,11 +16,15 @@ import '../screens/profile/device_settings_screen.dart';
 import '../screens/profile/device_detail_screen.dart';
 import '../screens/partner/partner_dashboard_screen.dart';
 import '../screens/partner/partner_bookings_screen.dart';
+import '../screens/partner/partner_machine_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/shop/product_detail_screen.dart';
+import '../screens/shop/products_list_screen.dart';
+import '../screens/music/healer_profile_screen.dart';
 import '../screens/shop/cart_screen.dart';
 import '../screens/shop/checkout_screen.dart';
 import '../screens/shop/order_confirmed_screen.dart';
+import '../models/product_model.dart';
 
 class _PlaceholderScreen extends StatelessWidget {
   const _PlaceholderScreen(this.name);
@@ -63,6 +67,23 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
 
     // ── E-Commerce Flow ──
+    GoRoute(
+      path: '/products',
+      builder: (_, _) => const ProductsListScreen(),
+      routes: [
+        GoRoute(
+          path: 'category/:cat',
+          builder: (_, state) {
+            final catStr = state.pathParameters['cat']!;
+            final cat = ProductCategory.values.firstWhere(
+              (c) => c.name == catStr,
+              orElse: () => ProductCategory.singingBowl,
+            );
+            return ProductsListScreen(filterCategory: cat);
+          },
+        ),
+      ],
+    ),
     GoRoute(path: '/product/:id', builder: (_, state) => ProductDetailScreen(productId: state.pathParameters['id']!)),
     GoRoute(
       path: '/connect',
@@ -105,7 +126,7 @@ final GoRouter appRouter = GoRouter(
     GoRoute(path: '/music',        builder: (_, state) => MusicScreen(deviceName: state.extra as String? ?? 'WeLLzen')),
     GoRoute(path: '/player',       builder: (_, _) => const PlayerScreen()),
     GoRoute(path: '/player/queue', builder: (_, _) => const PlayerScreen()),
-    GoRoute(path: '/healer/:id',   builder: (_, _) => const _PlaceholderScreen('13c Healer Profile')),
+    GoRoute(path: '/healer/:id',   builder: (_, state) => HealerProfileScreen(healerId: state.pathParameters['id']!)),
 
     // ── Profile & Partner Flow ──
     GoRoute(
@@ -120,7 +141,16 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(path: '/partner',            builder: (_, _) => const PartnerDashboardScreen()),
     GoRoute(path: '/partner/bookings',   builder: (_, _) => const PartnerBookingsScreen()),
-    GoRoute(path: '/partner/machines',   builder: (_, _) => const _PlaceholderScreen('17g Machine Management')),
+    GoRoute(
+      path: '/partner/machines',
+      builder: (_, _) => const PartnerMachineScreen(),
+      routes: [
+        GoRoute(
+          path: ':id',
+          builder: (_, state) => DeviceDetailScreen(deviceId: state.pathParameters['id']!),
+        ),
+      ],
+    ),
 
     // ── My Orders ──
     GoRoute(

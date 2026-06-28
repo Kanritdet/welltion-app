@@ -26,6 +26,29 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
+  void _showDeleteConfirmSheet(BuildContext ctx, CartItemModel item) {
+    final variant = MockData.variantById(item.variantId);
+    final product = variant != null ? MockData.productById(variant.productId) : null;
+    if (product == null) return;
+
+    showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => _DeleteConfirmSheet(
+        productName: product.name,
+        thumbnail: variant!.image,
+        onConfirm: () {
+          Navigator.pop(sheetCtx);
+          final user = ctx.read<AuthProvider>().currentUser;
+          if (user != null) {
+            ctx.read<CartProvider>().removeItem(cartItemId: item.id, userId: user.id);
+          }
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,15 +115,7 @@ class _CartScreenState extends State<CartScreen> {
                                           );
                                     }
                                   },
-                                  onRemove: () {
-                                    final user = context.read<AuthProvider>().currentUser;
-                                    if (user != null) {
-                                      context.read<CartProvider>().removeItem(
-                                            cartItemId: item.id,
-                                            userId: user.id,
-                                          );
-                                    }
-                                  },
+                                  onRemove: () => _showDeleteConfirmSheet(context, item),
                                 ),
                               )),
                           const SizedBox(height: 4),
@@ -345,6 +360,104 @@ class _Row extends StatelessWidget {
         Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
         Text(value, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary)),
       ],
+    );
+  }
+}
+
+// ─── Delete Confirm Sheet ─────────────────────────────────────────────────────
+
+class _DeleteConfirmSheet extends StatelessWidget {
+  const _DeleteConfirmSheet({
+    required this.productName,
+    required this.thumbnail,
+    required this.onConfirm,
+  });
+  final String productName;
+  final String thumbnail;
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).padding.bottom;
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 20 + bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+            ),
+          ),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(color: AppColors.errorLight, borderRadius: BorderRadius.circular(16)),
+            child: const Icon(Icons.delete_outline_rounded, size: 28, color: AppColors.errorDark),
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            'ลบสินค้าออกจากตะกร้า?',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            productName,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'ย้อนกลับ',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: GestureDetector(
+                  onTap: onConfirm,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    decoration: BoxDecoration(
+                      color: AppColors.errorLight,
+                      border: Border.all(color: const Color(0xFFEAC9C5)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'ลบสินค้า',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.errorDark),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

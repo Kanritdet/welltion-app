@@ -89,4 +89,19 @@ class PlayerProvider extends ChangeNotifier {
     _isPlaying = true;
     notifyListeners();
   }
+
+  void reorderQueue(int oldIndex, int newIndex) {
+    if (newIndex > oldIndex) newIndex--;
+    final item = _queue.removeAt(oldIndex);
+    _queue.insert(newIndex, item);
+    if (oldIndex == _currentIndex) {
+      _currentIndex = newIndex;
+    } else if (oldIndex < _currentIndex && newIndex >= _currentIndex) {
+      _currentIndex--;
+    } else if (oldIndex > _currentIndex && newIndex <= _currentIndex) {
+      _currentIndex++;
+    }
+    _currentTrack = _queue.isEmpty ? null : _queue[_currentIndex];
+    notifyListeners();
+  }
 }

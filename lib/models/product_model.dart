@@ -1,4 +1,4 @@
-enum ProductCategory { singingBowl, instrument, healthDevice }
+enum ProductCategory { singingBowl, instrument, healthDevice, rainStick }
 
 class ProductModel {
   final String id;
@@ -7,6 +7,8 @@ class ProductModel {
   final String description;
   final double basePrice;
   final String thumbnail;
+  final String? badge;
+  final String? spec;
 
   const ProductModel({
     required this.id,
@@ -15,5 +17,7 @@ class ProductModel {
     required this.description,
     required this.basePrice,
     required this.thumbnail,
+    this.badge,
+    this.spec,
   });
 }

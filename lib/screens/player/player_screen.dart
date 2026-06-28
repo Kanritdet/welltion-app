@@ -329,23 +329,24 @@ class _PlayerScreenState extends State<PlayerScreen> {
               ),
             ),
           ),
-          // Queue list
+          // Queue list — drag ≡ handle เพื่อจัดลำดับ
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) => Column(
-                  children: [
-                    _QueueItem(
-                      track: player.queue[i],
-                      isPlaying: i == player.currentIndex,
-                      onTap: () => player.jumpTo(i),
-                    ),
-                    if (i < player.queue.length - 1)
-                      const Divider(height: 1, color: Color(0xFFE3EFF4)),
-                  ],
-                ),
-                childCount: player.queue.length,
+            sliver: SliverReorderableList(
+              itemCount: player.queue.length,
+              onReorder: player.reorderQueue,
+              itemBuilder: (context, i) => Column(
+                key: ValueKey(player.queue[i].id),
+                children: [
+                  _QueueItem(
+                    track: player.queue[i],
+                    isPlaying: i == player.currentIndex,
+                    onTap: () => player.jumpTo(i),
+                    index: i,
+                  ),
+                  if (i < player.queue.length - 1)
+                    const Divider(height: 1, color: Color(0xFFE3EFF4)),
+                ],
               ),
             ),
           ),
@@ -537,10 +538,11 @@ class _NextTrackCard extends StatelessWidget {
 
 class _QueueItem extends StatelessWidget {
   const _QueueItem(
-      {required this.track, required this.isPlaying, required this.onTap});
+      {required this.track, required this.isPlaying, required this.onTap, required this.index});
   final TrackModel track;
   final bool isPlaying;
   final VoidCallback onTap;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
@@ -577,8 +579,11 @@ class _QueueItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Icon(Icons.drag_handle_rounded,
-                size: 22, color: AppColors.textMuted),
+            ReorderableDragStartListener(
+              index: index,
+              child: const Icon(Icons.drag_handle_rounded,
+                  size: 22, color: AppColors.textMuted),
+            ),
           ],
         ),
       ),

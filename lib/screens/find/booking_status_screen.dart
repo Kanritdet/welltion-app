@@ -29,6 +29,32 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> {
   void _simulateConfirm() => setState(() => _status = BookingStatus.confirmed);
   void _simulateReject() => setState(() => _status = BookingStatus.cancelled);
 
+  void _showCancelReasonSheet(BuildContext ctx) {
+    showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => _CancelReasonSheet(
+        onConfirm: () {
+          Navigator.pop(sheetCtx);
+          setState(() => _status = BookingStatus.cancelled);
+        },
+      ),
+    );
+  }
+
+  void _showReceiptSheet(BuildContext ctx) {
+    showModalBottomSheet(
+      context: ctx,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ReceiptSheet(
+        booking: widget.booking,
+        venueName: widget.venueName,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,7 +104,12 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> {
               ),
             ),
           ),
-          _StatusCtaBar(status: _status, booking: widget.booking),
+          _StatusCtaBar(
+            status: _status,
+            booking: widget.booking,
+            onCancel: () => _showCancelReasonSheet(context),
+            onViewReceipt: () => _showReceiptSheet(context),
+          ),
         ],
       ),
     );
@@ -599,9 +630,16 @@ class _DemoPartnerBar extends StatelessWidget {
 // ─── Status CTA Bar ───────────────────────────────────────────────────────────
 
 class _StatusCtaBar extends StatelessWidget {
-  const _StatusCtaBar({required this.status, required this.booking});
+  const _StatusCtaBar({
+    required this.status,
+    required this.booking,
+    required this.onCancel,
+    required this.onViewReceipt,
+  });
   final BookingStatus status;
   final BookingModel booking;
+  final VoidCallback onCancel;
+  final VoidCallback onViewReceipt;
 
   @override
   Widget build(BuildContext context) {
@@ -611,7 +649,7 @@ class _StatusCtaBar extends StatelessWidget {
     switch (status) {
       case BookingStatus.pending:
         child = GestureDetector(
-          onTap: () => context.go('/find'),
+          onTap: onCancel,
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -632,7 +670,7 @@ class _StatusCtaBar extends StatelessWidget {
         );
       case BookingStatus.confirmed:
         child = GestureDetector(
-          onTap: () {},
+          onTap: onViewReceipt,
           child: _goldButton('ดูใบจอง'),
         );
       default:
@@ -668,6 +706,294 @@ class _StatusCtaBar extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: AppColors.accentText,
         ),
+      ),
+    );
+  }
+}
+
+// ─── Cancel Reason Sheet ──────────────────────────────────────────────────────
+
+class _CancelReasonSheet extends StatefulWidget {
+  const _CancelReasonSheet({required this.onConfirm});
+  final VoidCallback onConfirm;
+
+  @override
+  State<_CancelReasonSheet> createState() => _CancelReasonSheetState();
+}
+
+class _CancelReasonSheetState extends State<_CancelReasonSheet> {
+  int _selected = 0;
+  final _otherCtrl = TextEditingController();
+
+  static const _reasons = [
+    'ติดธุระ / เปลี่ยนแผน',
+    'อยากเปลี่ยนเวลา',
+    'อื่นๆ',
+  ];
+
+  @override
+  void dispose() {
+    _otherCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom;
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 20 + bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+            ),
+          ),
+          const Text(
+            'เหตุผลที่ยกเลิก',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'กรุณาเลือกเหตุผลเพื่อช่วยให้เราพัฒนาบริการ',
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 14),
+          ..._reasons.asMap().entries.map((e) => GestureDetector(
+                onTap: () => setState(() => _selected = e.key),
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _selected == e.key ? AppColors.primaryDark : AppColors.border,
+                            width: 2,
+                          ),
+                        ),
+                        child: _selected == e.key
+                            ? Center(
+                                child: Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primaryDark,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        e.value,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: _selected == e.key ? AppColors.textPrimary : AppColors.textSecondary,
+                          fontWeight: _selected == e.key ? FontWeight.w500 : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )),
+          if (_selected == 2) ...[
+            const SizedBox(height: 4),
+            TextField(
+              controller: _otherCtrl,
+              maxLines: 2,
+              style: const TextStyle(fontSize: 13),
+              decoration: InputDecoration(
+                hintText: 'ระบุเหตุผลเพิ่มเติม...',
+                hintStyle: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: AppColors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: AppColors.primaryMid),
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'ไม่ยกเลิก',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: GestureDetector(
+                  onTap: widget.onConfirm,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    decoration: BoxDecoration(
+                      color: AppColors.errorLight,
+                      border: Border.all(color: const Color(0xFFEAC9C5)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'ยืนยันยกเลิก',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.errorDark),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Receipt Sheet ────────────────────────────────────────────────────────────
+
+class _ReceiptSheet extends StatelessWidget {
+  const _ReceiptSheet({required this.booking, required this.venueName});
+  final BookingModel booking;
+  final String venueName;
+
+  String _fmtDate() {
+    const months = ['', 'ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    final d = booking.date;
+    return '${d.day} ${months[d.month]} ${d.year + 543}';
+  }
+
+  String _endTime() {
+    final parts = booking.startTime.split(':');
+    final total = int.parse(parts[0]) * 60 + int.parse(parts[1]) + booking.durationMinutes;
+    return '${(total ~/ 60).toString().padLeft(2, '0')}:${(total % 60).toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).padding.bottom;
+    final rows = [
+      ('เลขที่การจอง', booking.id),
+      ('วันที่', _fmtDate()),
+      ('เวลา', '${booking.startTime} – ${_endTime()}'),
+      ('สถานที่', venueName),
+      ('ราคา', '฿${booking.price.toInt()}'),
+      ('สถานะ', 'ยืนยันแล้ว'),
+    ];
+
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 20 + bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+            ),
+          ),
+          const Text(
+            'ใบจอง',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 16),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Column(
+              children: rows.asMap().entries.map((e) {
+                final isLast = e.key == rows.length - 1;
+                return Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(e.value.$1, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                        Flexible(
+                          child: Text(
+                            e.value.$2,
+                            textAlign: TextAlign.end,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: isLast ? FontWeight.w600 : FontWeight.w500,
+                              color: isLast ? AppColors.successDark : AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (!isLast) const Divider(height: 18, color: Color(0xFFEAF3F8)),
+                  ],
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: 20),
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              decoration: BoxDecoration(
+                color: AppColors.accentGold,
+                border: Border.all(color: AppColors.accentBorder),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                child: Text(
+                  'ปิด',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.accentText),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

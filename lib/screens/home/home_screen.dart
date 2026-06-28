@@ -95,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         _SectionRow(
           title: 'เลือกชมสินค้า',
-          onSeeAll: () => context.push('/product/${products.first.id}'),
+          onSeeAll: () => context.push('/products'),
         ),
         const SizedBox(height: 12),
         Row(
@@ -186,7 +186,10 @@ class _HomeScreenState extends State<HomeScreen> {
             BookingSummaryCard(
               booking: next,
               venueName: venueName,
-              onTap: () => context.push('/booking/pending'),
+              onTap: () => context.push('/booking-status', extra: {
+                'booking': next,
+                'venueName': venueName,
+              }),
             ),
           ],
         );

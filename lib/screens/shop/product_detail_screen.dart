@@ -266,9 +266,10 @@ class _ProductInfo extends StatelessWidget {
 
   static String _categoryLabel(ProductCategory c) {
     switch (c) {
-      case ProductCategory.singingBowl: return 'ชามทิเบต';
-      case ProductCategory.instrument: return 'เครื่องดนตรี';
+      case ProductCategory.singingBowl: return 'ขันทิเบต';
+      case ProductCategory.instrument: return 'แฮนด์แพน';
       case ProductCategory.healthDevice: return 'เครื่องสุขภาพ';
+      case ProductCategory.rainStick: return 'กระบอกฝน';
     }
   }
 

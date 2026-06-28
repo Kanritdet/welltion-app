@@ -381,9 +381,23 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  void _showLogoutSheet(BuildContext context, AuthProvider auth) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => _LogoutConfirmSheet(
+        onConfirm: () {
+          Navigator.pop(sheetCtx);
+          auth.logout();
+        },
+      ),
+    );
+  }
+
   Widget _buildLogout(BuildContext context, AuthProvider auth) {
     return GestureDetector(
-      onTap: () => auth.logout(),
+      onTap: () => _showLogoutSheet(context, auth),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
         decoration: BoxDecoration(
@@ -454,6 +468,100 @@ class _StatCard extends StatelessWidget {
     );
   }
 }
+
+// ─── Logout Confirm Sheet ─────────────────────────────────────────────────────
+
+class _LogoutConfirmSheet extends StatelessWidget {
+  const _LogoutConfirmSheet({required this.onConfirm});
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).padding.bottom;
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 20 + bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+            ),
+          ),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(color: AppColors.errorLight, borderRadius: BorderRadius.circular(16)),
+            child: const Icon(Icons.logout, size: 26, color: AppColors.errorDark),
+          ),
+          const SizedBox(height: 14),
+          const Text(
+            'ออกจากระบบ?',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 6),
+          const Text(
+            'คุณสามารถกลับเข้าสู่ระบบได้ตลอดเวลา',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'ย้อนกลับ',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: GestureDetector(
+                  onTap: onConfirm,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    decoration: BoxDecoration(
+                      color: AppColors.errorLight,
+                      border: Border.all(color: const Color(0xFFEAC9C5)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'ออกจากระบบ',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.errorDark),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _MenuRow extends StatelessWidget {
   const _MenuRow({

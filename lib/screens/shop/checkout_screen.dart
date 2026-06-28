@@ -22,6 +22,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   _PaymentMethod _payment = _PaymentMethod.creditCard;
   bool _isLoading = false;
 
+  String _recipientName = MockData.currentUser.name;
+  String _phone = '081-234-5678';
+  String _addressLine = '88/12 ซ.อารีย์ 4 ถ.พหลโยธิน';
+  String _district = 'สามเสนใน เขตพญาไท';
+  String _province = 'กรุงเทพฯ';
+  String _postalCode = '10400';
+
+  void _showEditAddressSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _EditAddressSheet(
+        recipientName: _recipientName,
+        phone: _phone,
+        addressLine: _addressLine,
+        district: _district,
+        province: _province,
+        postalCode: _postalCode,
+        onSave: (name, phone, addr, dist, prov, postal) {
+          setState(() {
+            _recipientName = name;
+            _phone = phone;
+            _addressLine = addr;
+            _district = dist;
+            _province = prov;
+            _postalCode = postal;
+          });
+        },
+      ),
+    );
+  }
+
   Future<void> _placeOrder() async {
     setState(() => _isLoading = true);
     final user = context.read<AuthProvider>().currentUser;
@@ -46,7 +79,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
-    final user = MockData.currentUser;
     final total = cart.subtotal + _shippingFee;
 
     return Scaffold(
@@ -87,7 +119,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     // ── Address Section ───────────────────────────────────────
                     const _SectionLabel('ที่อยู่จัดส่ง'),
                     const SizedBox(height: 10),
-                    _AddressCard(user: user),
+                    _AddressCard(
+                      recipientName: _recipientName,
+                      phone: _phone,
+                      addressLine: _addressLine,
+                      district: _district,
+                      province: _province,
+                      postalCode: _postalCode,
+                      onEdit: _showEditAddressSheet,
+                    ),
                     const SizedBox(height: 16),
 
                     // ── Payment Section ───────────────────────────────────────
@@ -142,8 +182,22 @@ class _SectionLabel extends StatelessWidget {
 // ─── Address Card ─────────────────────────────────────────────────────────────
 
 class _AddressCard extends StatelessWidget {
-  const _AddressCard({required this.user});
-  final dynamic user;
+  const _AddressCard({
+    required this.recipientName,
+    required this.phone,
+    required this.addressLine,
+    required this.district,
+    required this.province,
+    required this.postalCode,
+    required this.onEdit,
+  });
+  final String recipientName;
+  final String phone;
+  final String addressLine;
+  final String district;
+  final String province;
+  final String postalCode;
+  final VoidCallback onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -164,26 +218,165 @@ class _AddressCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user.name as String,
+                  '$recipientName · $phone',
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 3),
-                const Text(
-                  '88/12 ซ.อารีย์ 4 ถ.พหลโยธิน กรุงเทพฯ 10400',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.6),
+                Text(
+                  '$addressLine $district $province $postalCode',
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.6),
                 ),
               ],
             ),
           ),
           const SizedBox(width: 8),
           GestureDetector(
-            onTap: () {},
+            onTap: onEdit,
             child: const Text(
               'แก้ไข',
               style: TextStyle(fontSize: 12, color: AppColors.primaryDark),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Edit Address Sheet ───────────────────────────────────────────────────────
+
+class _EditAddressSheet extends StatefulWidget {
+  const _EditAddressSheet({
+    required this.recipientName,
+    required this.phone,
+    required this.addressLine,
+    required this.district,
+    required this.province,
+    required this.postalCode,
+    required this.onSave,
+  });
+  final String recipientName;
+  final String phone;
+  final String addressLine;
+  final String district;
+  final String province;
+  final String postalCode;
+  final void Function(String, String, String, String, String, String) onSave;
+
+  @override
+  State<_EditAddressSheet> createState() => _EditAddressSheetState();
+}
+
+class _EditAddressSheetState extends State<_EditAddressSheet> {
+  late final TextEditingController _nameCtrl;
+  late final TextEditingController _phoneCtrl;
+  late final TextEditingController _addrCtrl;
+  late final TextEditingController _districtCtrl;
+  late final TextEditingController _provinceCtrl;
+  late final TextEditingController _postalCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameCtrl     = TextEditingController(text: widget.recipientName);
+    _phoneCtrl    = TextEditingController(text: widget.phone);
+    _addrCtrl     = TextEditingController(text: widget.addressLine);
+    _districtCtrl = TextEditingController(text: widget.district);
+    _provinceCtrl = TextEditingController(text: widget.province);
+    _postalCtrl   = TextEditingController(text: widget.postalCode);
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose(); _phoneCtrl.dispose(); _addrCtrl.dispose();
+    _districtCtrl.dispose(); _provinceCtrl.dispose(); _postalCtrl.dispose();
+    super.dispose();
+  }
+
+  InputDecoration _dec(String hint) => InputDecoration(
+        hintText: hint,
+        hintStyle: const TextStyle(fontSize: 13, color: AppColors.textMuted),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border)),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primaryMid)),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom;
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+      ),
+      padding: EdgeInsets.fromLTRB(16, 0, 16, 20 + bottom),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const Text(
+              'แก้ไขที่อยู่จัดส่ง',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 14),
+            TextField(controller: _nameCtrl, style: const TextStyle(fontSize: 13), decoration: _dec('ชื่อผู้รับ')),
+            const SizedBox(height: 10),
+            TextField(controller: _phoneCtrl, style: const TextStyle(fontSize: 13), keyboardType: TextInputType.phone, decoration: _dec('เบอร์โทร')),
+            const SizedBox(height: 10),
+            TextField(controller: _addrCtrl, style: const TextStyle(fontSize: 13), decoration: _dec('ที่อยู่')),
+            const SizedBox(height: 10),
+            TextField(controller: _districtCtrl, style: const TextStyle(fontSize: 13), decoration: _dec('แขวง / เขต')),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(child: TextField(controller: _provinceCtrl, style: const TextStyle(fontSize: 13), decoration: _dec('จังหวัด'))),
+                const SizedBox(width: 10),
+                SizedBox(width: 110, child: TextField(controller: _postalCtrl, style: const TextStyle(fontSize: 13), keyboardType: TextInputType.number, decoration: _dec('รหัสไปรษณีย์'))),
+              ],
+            ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: () {
+                widget.onSave(
+                  _nameCtrl.text.trim(),
+                  _phoneCtrl.text.trim(),
+                  _addrCtrl.text.trim(),
+                  _districtCtrl.text.trim(),
+                  _provinceCtrl.text.trim(),
+                  _postalCtrl.text.trim(),
+                );
+                Navigator.pop(context);
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                decoration: BoxDecoration(
+                  color: AppColors.accentGold,
+                  border: Border.all(color: AppColors.accentBorder),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Center(
+                  child: Text(
+                    'บันทึก',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.accentText),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
