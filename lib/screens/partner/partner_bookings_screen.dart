@@ -136,7 +136,7 @@ class _PartnerBookingsScreenState extends State<PartnerBookingsScreen> {
         return switch (_tab) {
           _BookingTab.pending => _buildPendingCard(b, i),
           _BookingTab.confirmed => _buildConfirmedCard(b),
-          _BookingTab.awaitingPayment => _buildAwaitingCard(b),
+          _BookingTab.awaitingPayment => _buildAwaitingCard(b, i),
         };
       },
     );
@@ -274,9 +274,11 @@ class _PartnerBookingsScreenState extends State<PartnerBookingsScreen> {
   }
 
   // ── Awaiting payment card ─────────────────────────────────────────
-  Widget _buildAwaitingCard(_PartnerBooking b) {
+  Widget _buildAwaitingCard(_PartnerBooking b, int index) {
     final isUrgent = b.timeInfo.contains('04');
-    return Container(
+    return GestureDetector(
+      onTap: () => _showPaymentSheet(b, index),
+      child: Container(
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: AppColors.border),
@@ -334,6 +336,133 @@ class _PartnerBookingsScreenState extends State<PartnerBookingsScreen> {
             ),
           ),
         ],
+      ),
+    ),
+    );
+  }
+
+  // ── 17f: Payment confirmation sheet ──────────────────────────────
+  void _showPaymentSheet(_PartnerBooking b, int index) {
+    final isUrgent = b.timeInfo.contains('04');
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFFF8FBFD),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 36, height: 4, decoration: BoxDecoration(color: const Color(0xFFA8D4E8), borderRadius: BorderRadius.circular(999))),
+            const SizedBox(height: 18),
+
+            // ── Info row ──────────────────────────────────────────
+            Row(
+              children: [
+                Container(
+                  width: 48, height: 48,
+                  decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(13)),
+                  child: const Icon(Icons.person, size: 24, color: AppColors.primaryDark),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(b.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                      const SizedBox(height: 2),
+                      Text(b.detail, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isUrgent ? const Color(0xFFFAEEDA) : const Color(0xFFEEF8EE),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    '${b.timeInfo.replaceAll('เหลือ ', '')} เหลือ',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                      color: isUrgent ? const Color(0xFF854F0B) : const Color(0xFF2E7D32)),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+
+            // ── Confirm banner ────────────────────────────────────
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.payments_rounded, size: 18, color: AppColors.primaryDark),
+                  SizedBox(width: 10),
+                  Text('ยืนยันว่าได้รับเงินจากลูกค้าแล้ว', style: TextStyle(fontSize: 13, color: AppColors.primaryDark)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // ── Buttons ───────────────────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text('ยกเลิก', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF444444))),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 2,
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      setState(() => _awaitingPayment.removeAt(index));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('รับชำระจาก ${b.name} แล้ว'), duration: const Duration(seconds: 2)),
+                      );
+                    },
+                    child: Container(
+                      height: 46,
+                      decoration: BoxDecoration(
+                        color: AppColors.accentGold,
+                        border: Border.all(color: AppColors.accentBorder),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.check_circle_rounded, size: 18, color: AppColors.accentText),
+                          SizedBox(width: 6),
+                          Text('ยืนยันรับชำระแล้ว', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.accentText)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

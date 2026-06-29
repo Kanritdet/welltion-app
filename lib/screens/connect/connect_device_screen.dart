@@ -25,6 +25,7 @@ class ConnectDeviceScreen extends StatefulWidget {
 
 class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
   bool _isScanned = false;
+  bool _isQrTab = true;
   int _selectedDuration = 30;
   final _serialController = TextEditingController();
 
@@ -62,7 +63,7 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
     );
   }
 
-  // ── 06a / 06b: QR + Serial combined ─────────────────────────────
+  // ── 06a / 06b: QR + Serial with tab toggle ───────────────────────
   Widget _buildQrFlow() {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
@@ -70,18 +71,18 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
-          const SizedBox(height: 12),
-          _buildSubtitle(),
           const SizedBox(height: 20),
-          _buildQrArea(),
-          if (_isScanned) ...[
-            const SizedBox(height: 16),
-            _buildScanResult(),
+          _buildConnectTabToggle(),
+          const SizedBox(height: 20),
+          if (_isQrTab) ...[
+            _buildQrArea(),
+            if (_isScanned) ...[
+              const SizedBox(height: 16),
+              _buildScanResult(),
+            ],
+          ] else ...[
+            _buildSerialInput(),
           ],
-          const SizedBox(height: 20),
-          _buildOrDivider(),
-          const SizedBox(height: 16),
-          _buildSerialInput(),
           const SizedBox(height: 24),
           _buildCtaBar(),
         ],
@@ -89,13 +90,48 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
     );
   }
 
-  Widget _buildSubtitle() {
-    final text = widget.mode == ConnectMode.booking
-        ? 'สแกน QR Code ที่ฐานเครื่อง WeLLzen เพื่อเริ่มใช้งานตามการจองของคุณ'
-        : 'สแกน QR Code ที่ฐานเครื่อง WeLLzen หรือกรอกรหัสเครื่อง (Serial Number) เพื่อเพิ่มอุปกรณ์เข้าบัญชีของคุณ';
-    return Text(
-      text,
-      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.5),
+  Widget _buildConnectTabToggle() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFEAF3F8),
+        borderRadius: BorderRadius.circular(13),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        children: [
+          _connectTab('สแกน QR', true),
+          _connectTab('รหัสสินค้า', false),
+        ],
+      ),
+    );
+  }
+
+  Widget _connectTab(String label, bool isQr) {
+    final active = _isQrTab == isQr;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() {
+          _isQrTab = isQr;
+          if (!isQr) _isScanned = false;
+        }),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          decoration: BoxDecoration(
+            color: active ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: active ? [const BoxShadow(color: Color(0x0F000000), blurRadius: 3, offset: Offset(0, 1))] : null,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: active ? FontWeight.w500 : FontWeight.normal,
+              color: active ? AppColors.primaryDark : const Color(0xFF444444),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -184,22 +220,6 @@ class _ConnectDeviceScreenState extends State<ConnectDeviceScreen> {
         decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: color, width: thick), right: BorderSide(color: color, width: thick)), borderRadius: BorderRadius.only(bottomRight: Radius.circular(rad))))),
       Positioned.fill(child: Center(child: Container(height: 2, color: const Color(0xFFF4EAD8).withValues(alpha: 0.4)))),
     ];
-  }
-
-  Widget _buildOrDivider() {
-    return Row(
-      children: [
-        const Expanded(child: Divider(color: Color(0xFFDDE6EE))),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            'หรือพิมพ์รหัสเครื่อง',
-            style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-          ),
-        ),
-        const Expanded(child: Divider(color: Color(0xFFDDE6EE))),
-      ],
-    );
   }
 
   Widget _buildSerialInput() {

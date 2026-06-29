@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../screens/shell/main_shell.dart';
 import '../screens/home/home_screen.dart';
@@ -24,22 +23,9 @@ import '../screens/music/healer_profile_screen.dart';
 import '../screens/shop/cart_screen.dart';
 import '../screens/shop/checkout_screen.dart';
 import '../screens/shop/order_confirmed_screen.dart';
+import '../screens/shop/order_error_screen.dart';
 import '../models/product_model.dart';
 
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen(this.name);
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(name)),
-      body: Center(
-        child: Text(name, style: Theme.of(context).textTheme.headlineMedium),
-      ),
-    );
-  }
-}
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/home',
@@ -106,7 +92,10 @@ final GoRouter appRouter = GoRouter(
         );
       },
     ),
-    GoRoute(path: '/order-error', builder: (_, _) => const _PlaceholderScreen('09b Order Error')),
+    GoRoute(path: '/order-error', builder: (_, state) {
+      final extra = state.extra as Map<String, dynamic>? ?? {};
+      return OrderErrorScreen(errorMessage: extra['errorMessage'] as String?);
+    }),
 
     // ── Find & Booking Flow ──
     GoRoute(path: '/place/:id',    builder: (_, state) => PlaceDetailScreen(venueId: state.pathParameters['id']!)),
